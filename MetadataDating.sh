@@ -26,9 +26,17 @@ fi
 resultDir=$2
 mkdir -p "$resultDir"
 
-abs_path="$(cd "$1" && pwd -P)"
+datasetDir="$(cd "$1" && pwd -P)"
 
-find $abs_path -printf "%p\t%A+\t%T+\t%C+\t%A@\t%T@\t%C@\n" > "${resultDir}/MACTimes.tsv"
+find $datasetDir -mindepth 0 -maxdepth 0 -type d  -printf "%p\t%A+\t%T+\t%C+\t%A@\t%T@\t%C@\n" > "${resultsDir}/MACTimes.tsv"
+find $datasetDir -mindepth 1 -maxdepth 1 -type d > "${resultDir}/dirsToCheck.txt"
+
+while [ -s "${resultDir}/dirsToCheck.txt" ];
+do
+	sh MACTimeDirs.sh $resultDir
+done
+
+find $datasetDir -type f -printf "%p\t%A+\t%T+\t%C+\t%A@\t%T@\t%C@\n" >> "${resultDir}/MACTimes.tsv"
 
 cut -f1 "${resultDir}/MACTimes.tsv" | xargs -d "\n" stat --printf "%w\n" > "${resultDir}/BirthTimes.tsv"
 
@@ -37,13 +45,7 @@ paste -d"\t" "${resultDir}/MACTimes.tsv" "${resultDir}/BirthTimes.tsv" > "${resu
 cut -f1 "${resultDir}/MACTimes.tsv" |sed 's|.*/||'| awk -F. '{print (NF>1?$NF:"")}' > "${resultDir}/extensions.tsv"
 
 echo -e "File\tAccess Time\tModify Time\tChange Time\tAccess Time(epoch)\tModify Time(epoch)\tChange Time(epoch)\tBirth Time\tExtension" > "${resultDir}/results.tsv"
-
 paste -d"\t" "${resultDir}/MACBTimes.tsv" "${resultDir}/extensions.tsv" >> "${resultDir}/results.tsv"
-
-#echo -e "File\tATime\tMTime\tCtime\tATime(epoch)\tMtime(epoch)\tCtime(epoch)\tBirth Time\tExtension" > CodeResults.tsv
-
-#awk -F"\t" 'tolower($9) == "sh" || tolower($9) == "c" || tolower($9) == "cgi" || tolower($9) == "o" || tolower($9) == "html" || tolower($9) == "htm" || tolower($9) == "make"' results.tsv >> CodeResults.tsv
-
 
 if [ ! -z "$3" ]
 then
