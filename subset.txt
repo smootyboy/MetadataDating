@@ -1,0 +1,7 @@
+sh
+c
+cgi
+o
+htm
+html
+make
