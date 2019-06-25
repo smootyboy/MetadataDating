@@ -28,15 +28,15 @@ mkdir -p "$resultDir"
 
 datasetDir="$(cd "$1" && pwd -P)"
 
-find $datasetDir -mindepth 0 -maxdepth 0 -type d  -printf "%p\t%A+\t%T+\t%C+\t%A@\t%T@\t%C@\n" >| "${resultDir}/MACTimes.tsv"
-find $datasetDir -mindepth 1 -maxdepth 1 -type d >| "${resultDir}/dirsToCheck.txt"
+find "$datasetDir" -mindepth 0 -maxdepth 0 -type d  -printf "%p\t%A+\t%T+\t%C+\t%A@\t%T@\t%C@\n" >| "${resultDir}/MACTimes.tsv"
+find "$datasetDir" -mindepth 1 -maxdepth 1 -type d >| "${resultDir}/dirsToCheck.txt"
 
 while [ -s "${resultDir}/dirsToCheck.txt" ];
 do
 	sh MACTimeDirs.sh $resultDir
 done
 
-find $datasetDir -type f -printf "%p\t%A+\t%T+\t%C+\t%A@\t%T@\t%C@\n" >> "${resultDir}/MACTimes.tsv"
+find "$datasetDir" -type f -printf "%p\t%A+\t%T+\t%C+\t%A@\t%T@\t%C@\n" >> "${resultDir}/MACTimes.tsv"
 
 cut -f1 "${resultDir}/MACTimes.tsv" | xargs -d "\n" stat --printf "%w\n" >| "${resultDir}/BirthTimes.tsv"
 
